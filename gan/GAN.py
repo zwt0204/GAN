@@ -17,9 +17,14 @@ class GAN:
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.is_training = is_training
+        self.beta1 = 0.5
+        self.input_height = 28
+        self.input_width = 28
+        self.output_height = 28
+        self.output_width = 28
         # 真实图片
         # Placeholder for input images to the discriminator
-        self.x_placeholder = tf.placeholder("float", shape=[None, 28, 28, 1])
+        self.x_placeholder = tf.placeholder("float", shape=[None, self.input_height, self.input_width, 1])
         # 噪声
         # Placeholder for input noise vectors to the generator
         self.z_placeholder = tf.placeholder(tf.float32, [None, z_dimensions])
@@ -33,6 +38,7 @@ class GAN:
         self.Dg = self.discriminator(self.Gz, reuse=True)
 
     def create_loss(self):
+        # 生成样本，但是我们为了迷惑判别器，给与标签1
         self.g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.Dg, labels=tf.ones_like(self.Dg)))
         d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.Dx, labels=tf.ones_like(self.Dx)))
         d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.Dg, labels=tf.zeros_like(self.Dg)))
@@ -42,8 +48,8 @@ class GAN:
         d_vars = [var for var in tvars if 'd_' in var.name]
         g_vars = [var for var in tvars if 'g_' in var.name]
         with tf.variable_scope(tf.get_variable_scope(), reuse=False):
-            self.trainerD = tf.train.AdamOptimizer(self.learning_rate).minimize(self.d_loss, var_list=d_vars)
-            self.trainerG = tf.train.AdamOptimizer(self.learning_rate).minimize(self.g_loss, var_list=g_vars)
+            self.trainerD = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.d_loss, var_list=d_vars)
+            self.trainerG = tf.train.AdamOptimizer(self.learning_rate, beta1=self.beta1).minimize(self.g_loss, var_list=g_vars)
 
     def conv2d(self, x, W):
         return tf.nn.conv2d(input=x, filter=W, strides=[1, 1, 1, 1], padding='SAME')
@@ -91,7 +97,7 @@ class GAN:
             # Color dimension of output (MNIST is grayscale, so c_dim = 1 for us)
             c_dim = 1
             # Output size of the image
-            s = 28
+            s = self.output_height
             # We want to slowly upscale the image, so these values will help
             # make that change gradual.
             s2, s4, s8, s16 = int(s / 2), int(s / 4), int(s / 8), int(

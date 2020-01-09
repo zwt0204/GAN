@@ -20,7 +20,7 @@ class Predict:
         self.model_dir = 'D:\mygit\GAN\data\gan'
         self.z_dimensions = 100
         self.batch_size = 1
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.001
         self.is_training = False
         with self.graph.as_default():
             self.model = GAN(self.z_dimensions, self.batch_size, self.learning_rate, self.is_training)

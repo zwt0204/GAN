@@ -22,12 +22,12 @@ class TrainGan:
         self.model_dir = 'D:\mygit\GAN\data\gan'
         self.z_dimensions = 100
         self.batch_size = 16
-        self.learning_rate =0.0001
+        self.learning_rate =0.001
         self.is_training = True
         self.model = GAN(self.z_dimensions, self.batch_size, self.learning_rate, self.is_training)
         self.saver = tf.train.Saver()
 
-    def train(self, epochs=30000):
+    def train(self, epochs=3000):
         z_batch = np.random.normal(-1, 1, size=[self.batch_size, self.z_dimensions])
         real_image_batch = mnist.train.next_batch(self.batch_size)
         real_image_batch = np.reshape(real_image_batch[0], [self.batch_size, 28, 28, 1])
